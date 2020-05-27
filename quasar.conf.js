@@ -180,9 +180,6 @@ module.exports = function (/* ctx */) {
         // https://www.electron.build/configuration/configuration
 
         appId: 'axioms-jwt-debugger'
-        win: {
-      target: 'nsis'
-    },
       },
 
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
