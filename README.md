@@ -24,5 +24,23 @@ quasar build
 quasar build --mode electron
 ```
 
+### Install Electron Packager
+```bash
+# For use from the CLI
+npm install electron-packager -g
+npm i electron-installer-dmg -g
+npm install -g electron-installer-debian
+```
+
+Mac Installer ([See details](https://github.com/electron-userland/electron-installer-dmg))
+```bash
+electron-installer-dmg ./dist/electron/JWT\ Debugger-darwin-x64/JWT\ Debugger.app JWTDebugger.app --dest dist/Installers/
+```
+
+Linux Installer ([See details](https://github.com/electron-userland/electron-installer-debian))
+å
+
 ### Customize the configuration
 See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
+
+
