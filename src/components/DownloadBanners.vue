@@ -52,9 +52,12 @@
 </template>
 <script>
 import { Platform, openURL } from 'quasar'
+
 export default {
-  launch(url) {
-    openURL(url)
+  methods: {
+    launch(url) {
+      openURL(url)
+    }
   }
 }
 </script>
