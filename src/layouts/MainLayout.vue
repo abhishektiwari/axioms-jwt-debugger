@@ -12,14 +12,40 @@
         />
 
         <q-toolbar-title>
+          <q-avatar>
+            <img src="https://static.axioms.io/branding/jwt-debugger-app.svg">
+          </q-avatar>
           JWT Debugger
         </q-toolbar-title>
 
         <div>
-          <q-btn unelevated style="background: #002e66; color: white; text-transform: none;" label="Crafted by Axioms" @click="launch('https://axioms.io')"/>
-          <q-btn unelevated round color="primary" icon="fab fa-twitter" @click="launch('https://twitter.com/axioms_io')" />
-          <q-btn unelevated round color="primary" icon="fab fa-linkedin" @click="launch('https://www.linkedin.com/company/axioms-io/')" />
-          <q-btn unelevated round color="primary" icon="fab fa-github" @click="launch('https://github.com/axioms-io')" />
+          <q-btn
+            unelevated
+            style="background: #002e66; color: white; text-transform: none;"
+            label="Built by Axioms"
+            @click="launch('https://axioms.io')"
+          />
+          <q-btn
+            unelevated
+            round
+            color="primary"
+            icon="fab fa-twitter"
+            @click="launch('https://twitter.com/axioms_io')"
+          />
+          <q-btn
+            unelevated
+            round
+            color="primary"
+            icon="fab fa-linkedin"
+            @click="launch('https://www.linkedin.com/company/axioms-io/')"
+          />
+          <q-btn
+            unelevated
+            round
+            color="primary"
+            icon="fab fa-github"
+            @click="launch('https://github.com/axioms-io/axioms-jwt-debugger')"
+          />
         </div>
       </q-toolbar>
     </q-header>
