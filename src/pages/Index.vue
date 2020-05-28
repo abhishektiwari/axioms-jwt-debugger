@@ -19,6 +19,7 @@
                 type="textarea"
                 class="jwt_token"
                 debounce="500"
+                i
                 @input="parseJwtToken"
               />
             </q-card-section>
@@ -86,67 +87,13 @@
               </div>
             </q-card-section>
             <q-separator />
-            <div class="q-pa-sm q-gutter-sm" v-if="token && !validToken">
-              <q-banner rounded class="bg-red-8 text-white">
-                <div class="text-h6">JWT Token is invalid</div>
-                The JWT has not been verified and is not valid for use
-              </q-banner>
-            </div>
-            <div class="q-pa-sm q-gutter-sm" v-if="token && validToken">
-              <q-banner rounded class="bg-green-8 text-white">
-                <div class="text-h6">JWT Token is valid</div>
-                JWT Token has been verified using the key
-              </q-banner>
-            </div>
-            <div
-              class="q-pa-sm q-gutter-sm"
-              v-if="token && !foundPublicKey && !secret"
-            >
-              <q-banner rounded class="bg-red-8 text-white">
-                <div class="text-h6">Key not found</div>
-                No matching key was found
-              </q-banner>
-            </div>
-            <div class="q-pa-sm q-gutter-sm" v-if="token && foundPublicKey">
-              <q-banner rounded class="bg-green-8 text-white">
-                <div class="text-h6">Key found</div>
-                A signing key matching <q-badge color="orange">kid</q-badge> was
-                found
-              </q-banner>
-            </div>
-            <div class="q-pa-sm q-gutter-sm" v-if="token && validToken">
-              <q-banner rounded class="bg-green-8 text-white">
-                <div class="text-h6">Signature verified</div>
-                The signature of the JWT token has been verified using a key or
-                secret
-              </q-banner>
-            </div>
-            <div class="q-pa-sm q-gutter-sm" v-if="token && !validToken">
-              <q-banner rounded class="bg-red-8 text-white">
-                <div class="text-h6">Signature not verified</div>
-                The signature of the JWT has not been verified
-              </q-banner>
-            </div>
-            <div
-              class="q-pa-sm q-gutter-sm"
-              v-if="token && !isTokenExpired && tokenPayload.exp"
-            >
-              <q-banner rounded class="bg-red-8 text-white">
-                <div class="text-h6">Expired</div>
-                The JWT expired on
-                {{ new Date(tokenPayload.exp * 1000).toLocaleString() }}
-              </q-banner>
-            </div>
-            <div
-              class="q-pa-sm q-gutter-sm"
-              v-if="token && isTokenExpired && tokenPayload.exp"
-            >
-              <q-banner rounded class="bg-green-8 text-white">
-                <div class="text-h6">Not expired</div>
-                The JWT will expire on
-                {{ new Date(tokenPayload.exp * 1000).toLocaleString() }}
-              </q-banner>
-            </div>
+            <ValidationBanners
+              :token="token"
+              :secret="secret"
+              :isValidToken="isValidToken"
+              :tokenPayload="tokenPayload"
+              :hasPublicKey="hasPublicKey"
+            />
             <q-banner dense rounded class="bg-grey-3" v-if="token">
               <div class="text-h6">Token Header</div>
             </q-banner>
@@ -179,149 +126,34 @@
         </div>
       </div>
     </div>
-    <div class="column items-center" v-if="!$q.platform.is.electron">
-      <div class="col" v-if="$q.platform.is.desktop && $q.platform.is.mac">
-        <q-banner rounded class="bg-grey-3">
-          Download the JWT Debugger for Mac Desktop
-          <q-btn
-            unelevated
-            round
-            color="primary"
-            icon="fas fa-download"
-            @click="
-              launch(
-                'https://github.com/axioms-io/axioms-jwt-debugger/releases/download/0.0.1/JWTDebugger.app.dmg'
-              )
-            "
-          />
-        </q-banner>
-      </div>
-    </div>
+    <download-banners />
   </q-page>
 </template>
 
 <script>
 import VueJsonPretty from 'vue-json-pretty'
-import jws from 'jws'
-import axios from 'axios'
-import jwktopem from 'jwk-to-pem'
-import { copyToClipboard, Platform, openURL } from 'quasar'
+import { validateTokenMixin } from '../mixins/validateToken'
+import { copyToClipboard } from 'quasar'
+import ValidationBanners from 'components/ValidationBanners'
+import DownloadBanners from 'components/DownloadBanners'
+
 export default {
   name: 'PageIndex',
-  data() {
-    return {
-      token: '',
-      jwksUri: null,
-      validToken: false,
-      isToken: false,
-      expiredToken: false,
-      validSignature: false,
-      tokenPayload: false,
-      tokenHeader: false,
-      publicKeys: [],
-      foundPublicKey: false,
-      secret: ''
-    }
+  mixins: [validateTokenMixin],
+  components: {
+    ValidationBanners,
+    VueJsonPretty,
+    DownloadBanners
   },
   methods: {
-    launch(url) {
-      openURL(url)
-    },
-    async getJwksKeys() {
-      let response
-      let keys
-      try {
-        if (this.jwksUri) {
-          console.log(this.jwksUri)
-          response = await axios.get(this.jwksUri)
-          keys = response.data.keys
-          if (!keys || !keys.length) {
-            console.error('No public keys found')
-            this.keyFound = false
-          } else {
-            this.publicKeys = keys
-            this.foundPublicKey = true
-            this.parseJwtToken()
-          }
-        } else {
-          console.log('JWKS URI is blank or null')
-          this.publicKeys = []
-          this.keyFound = false
-        }
-      } catch (error) {
-        throw error
-      }
-    },
-    parseJwtToken() {
-      if (this.token) {
-        const decoded = jws.decode(this.token)
-        this.tokenHeader = decoded.header
-        if (typeof decoded.payload === 'object') {
-          console.log('object', decoded.payload)
-          this.tokenPayload = decoded.payload
-        } else {
-          console.log('string')
-          this.tokenPayload = JSON.parse(decoded.payload)
-        }
-        if (this.tokenHeader && this.tokenPayload) {
-          this.isToken = true
-          this.isTokenValid()
-        }
-      } else {
-        this.token = ''
-        this.tokenPayload = false
-        this.tokenHeader = false
-      }
-    },
-    parseSecret() {
-      this.isTokenValidHmac()
-    },
-    isTokenValid() {
-      try {
-        const key = this.publicKeys.find(
-          key => key.kid === this.tokenHeader.kid
-        )
-        if (key) {
-          this.validToken = jws.verify(this.token, key.alg, jwktopem(key))
-        } else {
-          console.log('No matching key found')
-          this.validToken = false
-        }
-      } catch (error) {
-        console.error(error)
-        this.validToken = false
-      }
-    },
-    isTokenValidHmac() {
-      try {
-        if (this.secret) {
-          this.validToken = jws.verify(this.token, 'HS256', this.secret)
-        } else {
-          console.log('No matching secret found')
-          this.validToken = false
-        }
-      } catch (error) {
-        console.error(error)
-        this.validToken = false
-      }
-    },
     handleClick(path, data) {
       copyToClipboard(data).then(() => {
         this.$q.notify('Copied')
       })
     }
   },
-  computed: {
-    isTokenExpired() {
-      if (this.tokenPayload) {
-        return Date.now() > this.tokenPayload.exp
-      } else {
-        return false
-      }
-    }
-  },
-  components: {
-    VueJsonPretty
+  created() {
+    this.initialToken()
   }
 }
 </script>
