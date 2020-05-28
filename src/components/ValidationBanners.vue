@@ -12,16 +12,28 @@
         JWT Token has been verified using the key
       </q-banner>
     </div>
-    <div class="q-pa-sm q-gutter-sm" v-if="token && !hasPublicKey && !secret">
+    <div class="q-pa-sm q-gutter-sm" v-if="token && !hasPublicKey && !hasHmacAlg">
       <q-banner rounded class="bg-red-8 text-white">
         <div class="text-h6">Key not found</div>
-        No matching key was found
+        No matching signing key was found
       </q-banner>
     </div>
-    <div class="q-pa-sm q-gutter-sm" v-if="token && hasPublicKey">
+    <div class="q-pa-sm q-gutter-sm" v-if="token && !secret && hasHmacAlg">
+      <q-banner rounded class="bg-red-8 text-white">
+        <div class="text-h6">Key not found</div>
+        No signing secret was found
+      </q-banner>
+    </div>
+    <div class="q-pa-sm q-gutter-sm" v-if="token && hasPublicKey && !hasHmacAlg">
       <q-banner rounded class="bg-green-8 text-white">
         <div class="text-h6">Key found</div>
         A signing key matching <q-badge color="orange">kid</q-badge> was found
+      </q-banner>
+    </div>
+    <div class="q-pa-sm q-gutter-sm" v-if="token && secret && hasHmacAlg">
+      <q-banner rounded class="bg-green-8 text-white">
+        <div class="text-h6">Key found</div>
+        A signing key secret was found
       </q-banner>
     </div>
     <div class="q-pa-sm q-gutter-sm" v-if="token && isValidToken">
@@ -61,11 +73,11 @@
 
 <script>
 export default {
-  props: ['token', 'isValidToken', 'tokenPayload', 'hasPublicKey', 'secret'],
+  props: ['token', 'isValidToken', 'tokenPayload', 'hasPublicKey', 'secret', 'hasHmacAlg'],
   computed: {
     isTokenExpired() {
       if (this.tokenPayload) {
-        return Math.round(new Date().getTime() / 1000) > this.tokenPayload.exp
+        return Math.round(new Date().getTime() / 1000) < this.tokenPayload.exp
       } else {
         return false
       }

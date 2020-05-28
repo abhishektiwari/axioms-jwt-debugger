@@ -93,6 +93,7 @@
               :isValidToken="isValidToken"
               :tokenPayload="tokenPayload"
               :hasPublicKey="hasPublicKey"
+              :hasHmacAlg="hasHmacAlg"
             />
             <q-banner dense rounded class="bg-grey-3" v-if="token">
               <div class="text-h6">Token Header</div>

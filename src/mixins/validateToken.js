@@ -19,14 +19,15 @@ export const validateTokenMixin = {
       token: '',
       jwksUri: null,
       isValidToken: false,
-      isToken: false,
       expiredToken: false,
       hasValidSignature: false,
       tokenPayload: false,
       tokenHeader: false,
       publicKeys: [],
       hasPublicKey: false,
-      secret: ''
+      signingAlg: '',
+      secret: '',
+      hmacAlg: ['HS256', 'HS384', 'HS512']
     }
   },
   methods: {
@@ -41,12 +42,13 @@ export const validateTokenMixin = {
             sub: generateQuickGuid(),
             name: 'John Doe',
             jti: generateQuickGuid(),
-            exp: Math.round(new Date().getTime() / 1000) + 60
+            exp: Math.round(new Date().getTime() / 1000) + 300
           }
         })
         this.parseJwtToken()
         this.isTokenValidHmac()
         this.hasPublicKey = false
+        this.signingAlg = 'HS256'
       }
     },
     async getJwksKeys() {
@@ -68,7 +70,8 @@ export const validateTokenMixin = {
         } else {
           console.log('JWKS URI is blank or null')
           this.publicKeys = []
-          this.keyFound = false
+          this.hasPublicKey = false
+          this.parseJwtToken()
         }
       } catch (error) {
         throw error
@@ -76,23 +79,35 @@ export const validateTokenMixin = {
     },
     parseJwtToken() {
       if (this.token) {
-        const decoded = jws.decode(this.token)
-        this.tokenHeader = decoded.header
-        if (typeof decoded.payload === 'object') {
-          console.log('object', decoded.payload)
-          this.tokenPayload = decoded.payload
-        } else {
-          console.log('string')
-          this.tokenPayload = JSON.parse(decoded.payload)
-        }
-        if (this.tokenHeader && this.tokenPayload) {
-          this.isToken = true
-          this.isTokenValid()
+        try {
+          const decoded = jws.decode(this.token)
+          this.tokenHeader = decoded.header
+          if (typeof decoded.payload === 'object') {
+            console.log('object', decoded.payload)
+            this.tokenPayload = decoded.payload
+          } else {
+            console.log('string')
+            this.tokenPayload = JSON.parse(decoded.payload)
+          }
+          if (this.tokenHeader && this.tokenPayload) {
+            this.signingAlg = this.tokenHeader.alg
+            this.isTokenValid()
+          } else {
+            this.tokenPayload = false
+            this.tokenHeader = false
+            this.signingAlg = ''
+          }
+        } catch (error) {
+          this.tokenPayload = false
+          this.tokenHeader = false
+          this.isValidToken = false
+          this.signingAlg = ''
         }
       } else {
         this.token = ''
         this.tokenPayload = false
         this.tokenHeader = false
+        this.signingAlg = ''
       }
     },
     parseSecret() {
@@ -104,7 +119,11 @@ export const validateTokenMixin = {
           key => key.kid === this.tokenHeader.kid
         )
         if (key) {
-          this.isValidToken = jws.verify(this.token, key.alg, jwktopem(key))
+          this.isValidToken = jws.verify(
+            this.token,
+            this.signingAlg,
+            jwktopem(key)
+          )
         } else {
           console.log('No matching key found')
           this.isValidToken = false
@@ -117,7 +136,11 @@ export const validateTokenMixin = {
     isTokenValidHmac() {
       try {
         if (this.secret) {
-          this.isValidToken = jws.verify(this.token, 'HS256', this.secret)
+          this.isValidToken = jws.verify(
+            this.token,
+            this.signingAlg,
+            this.secret
+          )
         } else {
           console.log('No matching secret found')
           this.isValidToken = false
@@ -126,6 +149,11 @@ export const validateTokenMixin = {
         console.error(error)
         this.isValidToken = false
       }
+    }
+  },
+  computed: {
+    hasHmacAlg() {
+      return this.hmacAlg.includes(this.signingAlg)
     }
   }
 }

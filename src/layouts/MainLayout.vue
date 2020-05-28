@@ -16,7 +16,7 @@
         </q-toolbar-title>
 
         <div>
-          <q-btn unelevated color="orange" label="Crafted by Axioms" @click="launch('https://axioms.io')"/>
+          <q-btn unelevated style="background: #002e66; color: white; text-transform: none;" label="Crafted by Axioms" @click="launch('https://axioms.io')"/>
           <q-btn unelevated round color="primary" icon="fab fa-twitter" @click="launch('https://twitter.com/axioms_io')" />
           <q-btn unelevated round color="primary" icon="fab fa-linkedin" @click="launch('https://www.linkedin.com/company/axioms-io/')" />
           <q-btn unelevated round color="primary" icon="fab fa-github" @click="launch('https://github.com/axioms-io')" />
