@@ -2,7 +2,7 @@
   <q-page>
     <div class="q-pa-md">
       <div class="full-width full-height row">
-        <div class="col-6 padding5">
+        <div class="col-sm-12 col-md-6 padding5">
           <q-card bordered flat class="no-margin full-height">
             <q-card-section class="q-pt-xs">
               <div class="text-h5 q-mt-sm q-mb-xs">JWT Token</div>
@@ -78,7 +78,7 @@
           </q-card>
         </div>
         <q-separator />
-        <div class="col-6 padding5">
+        <div class="col-sm-12 col-md-6 padding5">
           <q-card bordered flat class="no-margin full-height">
             <q-card-section class="q-pt-xs">
               <div class="text-h5 q-mt-sm q-mb-xs">Token Details</div>
