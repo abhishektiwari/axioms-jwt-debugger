@@ -40,7 +40,6 @@ electron-installer-dmg ./dist/electron/JWT\ Debugger-darwin-x64/JWT\ Debugger.ap
 ```
 
 Linux Installer ([See details](https://github.com/electron-userland/electron-installer-debian))
-å
 
 ### Customize the configuration
 See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).

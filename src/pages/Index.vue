@@ -148,6 +148,9 @@ export default {
   },
   methods: {
     handleClick(path, data) {
+      if (typeof data === 'object') {
+        data = JSON.stringify(data)
+      }
       copyToClipboard(data).then(() => {
         this.$q.notify('Copied')
       })
