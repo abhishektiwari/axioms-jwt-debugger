@@ -10,7 +10,7 @@
           icon="fas fa-download"
           @click="
             launch(
-              'https://github.com/axioms-io/axioms-jwt-debugger/releases/download/0.0.2/axioms-jwt-debugger.app_0.0.3.dmg'
+              'https://github.com/axioms-io/axioms-jwt-debugger/releases/download/0.0.3/axioms-jwt-debugger.app_0.0.3.dmg'
             )
           "
         />
@@ -26,7 +26,7 @@
           icon="fas fa-download"
           @click="
             launch(
-              'https://github.com/axioms-io/axioms-jwt-debugger/releases/download/0.0.2/axioms_jwt_debugger-0.0.3-setup.exe'
+              'https://github.com/axioms-io/axioms-jwt-debugger/releases/download/0.0.3/axioms_jwt_debugger-0.0.3-setup.exe'
             )
           "
         />
@@ -42,7 +42,7 @@
           icon="fas fa-download"
           @click="
             launch(
-              'https://github.com/axioms-io/axioms-jwt-debugger/releases/download/0.0.2/axioms-jwt-debugger_0.0.3_all.deb'
+              'https://github.com/axioms-io/axioms-jwt-debugger/releases/download/0.0.3/axioms-jwt-debugger_0.0.3_all.deb'
             )
           "
         />
