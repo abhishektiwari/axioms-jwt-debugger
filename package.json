@@ -1,7 +1,7 @@
 {
     "name": "axioms-jwt-debugger",
     "version": "0.0.3",
-    "description": "Axioms JWT Debugger",
+    "description": "JWT Debugger App by Axioms. Parse and validate a JSON Web Token (JWT).",
     "productName": "axioms-jwt-debugger",
     "cordovaId": "org.cordova.quasar.app",
     "capacitorId": "",
