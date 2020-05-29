@@ -39,6 +39,15 @@ npm install -g electron-installer-debian
 npm install -g electron-installer-windows
 ```
 
+### Build package and installer
+
+```bash
+make package
+make installer
+```
+
+OR,
+
 Using Electron packager [See details](https://github.com/electron/electron-packager)
 
 Mac Installer ([See details](https://github.com/electron-userland/electron-installer-dmg))

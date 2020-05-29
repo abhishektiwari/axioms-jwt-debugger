@@ -12,34 +12,22 @@
         JWT Token has been verified using the key
       </q-banner>
     </div>
-    <div class="q-pa-sm q-gutter-sm" v-if="token && !hasPublicKey && !hasHmacAlg">
+    <div class="q-pa-sm q-gutter-sm" v-if="token && !signingKey && !hasJwksKey">
       <q-banner rounded class="bg-red-8 text-white">
         <div class="text-h6">Key not found</div>
-        No matching signing key was found
+        No signing key was found for token validation
       </q-banner>
     </div>
-    <div class="q-pa-sm q-gutter-sm" v-if="token && !secret && hasHmacAlg">
-      <q-banner rounded class="bg-red-8 text-white">
-        <div class="text-h6">Key not found</div>
-        No signing secret was found
-      </q-banner>
-    </div>
-    <div class="q-pa-sm q-gutter-sm" v-if="token && hasPublicKey && !hasHmacAlg">
+    <div class="q-pa-sm q-gutter-sm" v-if="token && (signingKey || hasJwksKey)">
       <q-banner rounded class="bg-green-8 text-white">
         <div class="text-h6">Key found</div>
-        A signing key matching <q-badge color="orange">kid</q-badge> was found
-      </q-banner>
-    </div>
-    <div class="q-pa-sm q-gutter-sm" v-if="token && secret && hasHmacAlg">
-      <q-banner rounded class="bg-green-8 text-white">
-        <div class="text-h6">Key found</div>
-        A signing key secret was found
+        A signing key is available for token validation
       </q-banner>
     </div>
     <div class="q-pa-sm q-gutter-sm" v-if="token && isValidToken">
       <q-banner rounded class="bg-green-8 text-white">
         <div class="text-h6">Signature verified</div>
-        The signature of the JWT token has been verified using a key or secret
+        The signature of the JWT token has been verified using a signing key or secret
       </q-banner>
     </div>
     <div class="q-pa-sm q-gutter-sm" v-if="token && !isValidToken">
@@ -73,7 +61,7 @@
 
 <script>
 export default {
-  props: ['token', 'isValidToken', 'tokenPayload', 'hasPublicKey', 'secret', 'hasHmacAlg'],
+  props: ['token', 'isValidToken', 'tokenPayload', 'hasJwksKey', 'signingKey', 'hasHmacAlg'],
   computed: {
     isTokenExpired() {
       if (this.tokenPayload) {

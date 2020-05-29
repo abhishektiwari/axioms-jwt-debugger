@@ -25,7 +25,7 @@
             </q-card-section>
             <q-separator />
             <q-card-section>
-              <div class="text-h6">Public Key</div>
+              <div class="text-h6">JWKS Endpoint</div>
               <div class="text-caption text-grey">
                 For RSA and ECDSA signed token paste your JWKS Endpoint URL
               </div>
@@ -41,13 +41,13 @@
                 bordered
                 separator
                 class="rounded-borders q-mt-sm"
-                v-if="publicKeys.length > 0"
+                v-if="jwksKeys.length > 0"
               >
                 <q-item
                   clickable
                   v-ripple
                   active-class="text-orange"
-                  v-for="item in publicKeys"
+                  v-for="item in jwksKeys"
                   :key="item.kid"
                 >
                   <q-item-section avatar>
@@ -62,12 +62,16 @@
             </q-card-section>
             <q-separator />
             <q-card-section>
-              <div class="text-h6">Private Secret</div>
+              <div class="text-h6">Signing Key</div>
               <div class="text-caption text-grey">
-                For HMAC signed token paste your secret
+                For HMAC signed token paste your secret, OR
+              </div>
+              <div class="text-caption text-grey">
+                For RSA and ECDSA signed token paste public or private key in
+                PEM format
               </div>
               <q-input
-                v-model="secret"
+                v-model="signingKey"
                 filled
                 autogrow
                 type="textarea"
@@ -75,6 +79,13 @@
                 @input="parseSecret"
               />
             </q-card-section>
+            <q-separator v-if="token" />
+            <q-card-actions v-if="token">
+              <q-btn flat round icon="share" color="red"/>
+              <q-btn flat color="red" @click="shareWebLink">
+                Share via web link
+              </q-btn>
+            </q-card-actions>
           </q-card>
         </div>
         <q-separator />
@@ -89,10 +100,10 @@
             <q-separator />
             <ValidationBanners
               :token="token"
-              :secret="secret"
+              :signingKey="signingKey"
               :isValidToken="isValidToken"
               :tokenPayload="tokenPayload"
-              :hasPublicKey="hasPublicKey"
+              :hasJwksKey="hasJwksKey"
               :hasHmacAlg="hasHmacAlg"
             />
             <q-banner dense rounded class="bg-grey-3" v-if="token">
@@ -147,6 +158,17 @@ export default {
     DownloadBanners
   },
   methods: {
+    shareWebLink() {
+      var shareUrl
+      if (this.hasJwksKey && this.jwksKeys) {
+        shareUrl = `https://jwtdebugger.app#token=${this.token}&jwks=${this.jwksUri}`
+      } else {
+        shareUrl = `https://jwtdebugger.app#token=${this.token}`
+      }
+      copyToClipboard(shareUrl).then(() => {
+        this.$q.notify('Link copied')
+      })
+    },
     handleClick(path, data) {
       if (typeof data === 'object') {
         data = JSON.stringify(data)

@@ -1,6 +1,7 @@
 import jws from 'jws'
 import axios from 'axios'
 import jwktopem from 'jwk-to-pem'
+import qs from 'qs'
 
 function generateQuickGuid() {
   return (
@@ -23,21 +24,37 @@ export const validateTokenMixin = {
       hasValidSignature: false,
       tokenPayload: false,
       tokenHeader: false,
-      publicKeys: [],
-      hasPublicKey: false,
+      jwksKeys: [],
+      hasJwksKey: false,
       signingAlg: '',
-      secret: '',
+      signingKey: '',
       hmacAlg: ['HS256', 'HS384', 'HS512']
     }
   },
   methods: {
     initialToken() {
-      if (!this.token && !this.secret) {
-        this.secret = 'secret'
-        this.hasPublicKey = false
+      if (window.location.hash) {
+        var params = qs.parse(location.hash.replace(/(#!?[^#]+)?#/, '?'), {
+          ignoreQueryPrefix: true
+        })
+        for (const [key, value] of Object.entries(params)) {
+          if (key === 'token') {
+            this.token = value
+            this.parseJwtToken()
+          }
+          if (key === 'jwks') {
+            this.jwksUri = value
+            this.getJwksKeys()
+          }
+        }
+        window.location.hash = ''
+      }
+      if (!this.token && !this.signingKey) {
+        this.signingKey = 'secret'
+        this.hasJwksKey = false
         this.token = jws.sign({
           header: { alg: 'HS256', typ: 'JWT' },
-          privateKey: this.secret,
+          privateKey: this.signingKey,
           payload: {
             sub: generateQuickGuid(),
             name: 'John Doe',
@@ -46,8 +63,8 @@ export const validateTokenMixin = {
           }
         })
         this.parseJwtToken()
-        this.isTokenValidHmac()
-        this.hasPublicKey = false
+        this.validateTokenUsingSigningKey()
+        this.hasJwksKey = false
         this.signingAlg = 'HS256'
       }
     },
@@ -56,21 +73,20 @@ export const validateTokenMixin = {
       let keys
       try {
         if (this.jwksUri) {
-          console.log(this.jwksUri)
           response = await axios.get(this.jwksUri)
           keys = response.data.keys
           if (!keys || !keys.length) {
             console.error('No public keys found')
             this.keyFound = false
           } else {
-            this.publicKeys = keys
-            this.hasPublicKey = true
+            this.jwksKeys = keys
+            this.hasJwksKey = true
             this.parseJwtToken()
           }
         } else {
           console.log('JWKS URI is blank or null')
-          this.publicKeys = []
-          this.hasPublicKey = false
+          this.jwksKeys = []
+          this.hasJwksKey = false
           this.parseJwtToken()
         }
       } catch (error) {
@@ -79,22 +95,27 @@ export const validateTokenMixin = {
     },
     parseJwtToken() {
       if (this.token) {
+        this.isValidToken = false
         try {
           const decoded = jws.decode(this.token)
           this.tokenHeader = decoded.header
           if (typeof decoded.payload === 'object') {
-            console.log('object', decoded.payload)
             this.tokenPayload = decoded.payload
           } else {
-            console.log('string')
             this.tokenPayload = JSON.parse(decoded.payload)
           }
           if (this.tokenHeader && this.tokenPayload) {
             this.signingAlg = this.tokenHeader.alg
-            this.isTokenValid()
+            if (this.jwksKeys && !this.isValidToken) {
+              this.validateTokenUsingJwksKey()
+            }
+            if (this.signingKey && !this.isValidToken) {
+              this.validateTokenUsingSigningKey()
+            }
           } else {
             this.tokenPayload = false
             this.tokenHeader = false
+            this.isValidToken = false
             this.signingAlg = ''
           }
         } catch (error) {
@@ -107,17 +128,16 @@ export const validateTokenMixin = {
         this.token = ''
         this.tokenPayload = false
         this.tokenHeader = false
+        this.isValidToken = false
         this.signingAlg = ''
       }
     },
     parseSecret() {
-      this.isTokenValidHmac()
+      this.validateTokenUsingSigningKey()
     },
-    isTokenValid() {
+    validateTokenUsingJwksKey() {
       try {
-        const key = this.publicKeys.find(
-          key => key.kid === this.tokenHeader.kid
-        )
+        const key = this.jwksKeys.find(key => key.kid === this.tokenHeader.kid)
         if (key) {
           this.isValidToken = jws.verify(
             this.token,
@@ -125,7 +145,7 @@ export const validateTokenMixin = {
             jwktopem(key)
           )
         } else {
-          console.log('No matching key found')
+          console.log('No matching JSON key found')
           this.isValidToken = false
         }
       } catch (error) {
@@ -133,16 +153,16 @@ export const validateTokenMixin = {
         this.isValidToken = false
       }
     },
-    isTokenValidHmac() {
+    validateTokenUsingSigningKey() {
       try {
-        if (this.secret) {
+        if (this.signingKey) {
           this.isValidToken = jws.verify(
             this.token,
             this.signingAlg,
-            this.secret
+            this.signingKey
           )
         } else {
-          console.log('No matching secret found')
+          console.log('No signing key found')
           this.isValidToken = false
         }
       } catch (error) {
