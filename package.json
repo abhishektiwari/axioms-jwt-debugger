@@ -19,7 +19,7 @@
         "jwk-to-pem": "^2.0.3",
         "jws": "^4.0.0",
         "quasar": "^1.0.0",
-        "qs": "^6.7.0",
+        "qs": "^6.7.3",
         "vue-json-pretty": "^1.6.3"
     },
     "devDependencies": {
