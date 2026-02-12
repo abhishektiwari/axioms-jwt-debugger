@@ -19,7 +19,6 @@
                 type="textarea"
                 class="jwt_token"
                 debounce="500"
-                i
                 @input="parseJwtToken"
               />
             </q-card-section>
@@ -145,7 +144,7 @@
 <script>
 import VueJsonPretty from 'vue-json-pretty'
 import { validateTokenMixin } from '../mixins/validateToken'
-import { copyToClipboard } from 'quasar'
+import { copyToClipboard, useQuasar } from 'quasar'
 import ValidationBanners from 'components/ValidationBanners'
 import DownloadBanners from 'components/DownloadBanners'
 
@@ -156,6 +155,10 @@ export default {
     ValidationBanners,
     VueJsonPretty,
     DownloadBanners
+  },
+  setup() {
+    const $q = useQuasar();
+    return { $q };
   },
   methods: {
     shareWebLink() {

@@ -54,11 +54,12 @@
       v-model="leftDrawerOpen"
       show-if-above
       bordered
-      behavior="mobile"
+      :width="250"
+      :breakpoint="500"
       content-class="bg-grey-1"
     >
       <q-list>
-        <q-item-label header class="text-grey-8">
+        <q-item-label class="text-grey-8 q-pa-sm">
           Essential Links
         </q-item-label>
         <EssentialLink

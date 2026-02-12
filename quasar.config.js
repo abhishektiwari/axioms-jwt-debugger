@@ -6,8 +6,10 @@
 // Configuration for your app
 // https://quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
+const { configure } = require('quasar/wrappers');
+const webpack = require('webpack');
 
-module.exports = function (/* ctx */) {
+module.exports = configure(function (ctx) {
   return {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
@@ -37,7 +39,7 @@ module.exports = function (/* ctx */) {
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
     framework: {
       iconSet: 'material-icons', // Quasar icon set
-      lang: 'en-us', // Quasar language pack
+      lang: 'en-US', // Quasar language pack
 
       // Possible values for "all":
       // * 'auto' - Auto-import needed Quasar components & directives
@@ -57,12 +59,6 @@ module.exports = function (/* ctx */) {
       ]
     },
 
-    // https://quasar.dev/quasar-cli/cli-documentation/supporting-ie
-    supportIE: false,
-
-    // https://quasar.dev/quasar-cli/cli-documentation/supporting-ts
-    supportTS: false,
-
     // https://quasar.dev/quasar-cli/cli-documentation/prefetch-feature
     // preFetch: true
 
@@ -80,13 +76,32 @@ module.exports = function (/* ctx */) {
       // extractCSS: false,
 
       // https://quasar.dev/quasar-cli/cli-documentation/handling-webpack
-      extendWebpack (cfg) {
-        cfg.module.rules.push({
-          enforce: 'pre',
-          test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
-          exclude: /node_modules/
-        })
+      // extendWebpack (cfg) {
+      //   cfg.module.rules.push({
+      //     enforce: 'pre',
+      //     test: /\.(js|vue)$/,
+      //     loader: 'eslint-loader',
+      //     exclude: /node_modules/
+      //   })
+      // }
+      chainWebpack (chain) {
+        // provide fallback for node.js core modules
+        chain.merge({
+          resolve: {
+            fallback: {
+              crypto: require.resolve('crypto-browserify'),
+              stream: require.resolve('stream-browserify'),
+              util: require.resolve('util/'),
+              vm: require.resolve('vm-browserify')
+            }
+          }
+        });
+
+        // Define process variables for browser environment
+        chain.plugin('define-process-env').use(webpack.DefinePlugin, [{
+          'process.env.NODE_ENV': JSON.stringify(ctx.dev ? 'development' : 'production'),
+          'process.browser': true,
+        }]);
       }
     },
 
@@ -161,20 +176,7 @@ module.exports = function (/* ctx */) {
 
     // Full list of options: https://quasar.dev/quasar-cli/developing-electron-apps/configuring-electron
     electron: {
-      bundler: 'packager', // 'packager' or 'builder'
-
-      packager: {
-        // https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
-
-        // OS X / Mac App Store
-        // appBundleId: '',
-        // appCategoryType: '',
-        // osxSign: '',
-        // protocol: 'myapp://path',
-
-        // Windows only
-        // win32metadata: { ... }
-      },
+      bundler: 'builder', // 'packager' or 'builder'
 
       builder: {
         // https://www.electron.build/configuration/configuration
@@ -183,12 +185,14 @@ module.exports = function (/* ctx */) {
       },
 
       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
-      nodeIntegration: false,
+      // nodeIntegration: false, // Removed in Quasar v2 CLI for Electron, configure in main process file
 
-      extendWebpack (/* cfg */) {
-        // do something with Electron main process Webpack cfg
-        // chainWebpack also available besides this extendWebpack
-      }
+      // extendWebpack (/* cfg */) {
+      //   // do something with Electron main process Webpack cfg
+      //   // chainWebpack also available besides this extendWebpack
+      // }
+      // Use chainWebpackMain or extendWebpackMain for main process
+      // Use chainWebpackPreload or extendWebpackPreload for preload script
     }
   }
-}
+})

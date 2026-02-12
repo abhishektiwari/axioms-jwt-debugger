@@ -1,6 +1,6 @@
 <template>
   <div class="column items-center" v-if="!$q.platform.is.electron">
-    <div class="col" v-if="$q.platform.is.desktop && $q.platform.is.mac">
+    <div class="col" v-if="$q.platform.is.desktop && $q.platform.has.mac">
       <q-banner rounded class="bg-grey-3">
         Download the JWT Debugger for Mac Desktop
         <q-btn
@@ -16,7 +16,7 @@
         />
       </q-banner>
     </div>
-    <div class="col" v-if="$q.platform.is.desktop && $q.platform.is.win">
+    <div class="col" v-if="$q.platform.is.desktop && $q.platform.has.win">
       <q-banner rounded class="bg-grey-3">
         Download the JWT Debugger for Windows Desktop
         <q-btn
@@ -32,7 +32,7 @@
         />
       </q-banner>
     </div>
-    <div class="col" v-if="$q.platform.is.desktop && $q.platform.is.linux">
+    <div class="col" v-if="$q.platform.is.desktop && $q.platform.has.linux">
       <q-banner rounded class="bg-grey-3">
         Download the JWT Debugger for Debian Desktop
         <q-btn
@@ -51,9 +51,13 @@
   </div>
 </template>
 <script>
-import { Platform, openURL } from 'quasar'
+import { openURL, useQuasar } from 'quasar'
 
 export default {
+  setup() {
+    const $q = useQuasar();
+    return { $q };
+  },
   methods: {
     launch(url) {
       openURL(url)

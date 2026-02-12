@@ -12,7 +12,7 @@ const routes = [
 // Always leave this as last one
 if (process.env.MODE !== 'ssr') {
   routes.push({
-    path: '*',
+    path: '/:catchAll(.*)*', // New syntax for Vue Router v4
     component: () => import('pages/Error404.vue')
   })
 }
