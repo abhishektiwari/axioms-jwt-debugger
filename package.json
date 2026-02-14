@@ -17,7 +17,7 @@
         "@quasar/extras": "^1.0.0",
         "axios": "^0.21.2",
         "jwk-to-pem": "^2.0.3",
-        "jws": "^4.0.0",
+        "jws": "^4.0.1",
         "quasar": "^1.0.0",
         "qs": "^6.7.0",
         "vue-json-pretty": "^1.6.3"
